@@ -164,7 +164,7 @@ socket.on("current", function (data) {
 });
 
 socket.on("playsong", function (data) {
-  audio.currentTime = data + 1;
+  audio.currentTime = data;
   console.log(audio.currentTime);
   audio.play();
 });
