@@ -4,9 +4,7 @@ let socket = io();
 
 //var myCursor;
 var myParticles = [];
-
 var otherCursors = [];
-
 var clickEffect = [];
 var palette = [
   {r: 3, g: 196, b: 216 },
@@ -18,12 +16,21 @@ var palette = [
   {r: 255, g: 103, b: 0 }
 ];
 
+var audio = document.getElementById('myaudio');
+var roomname = "1";
+
 
 // __ Preload __
 
 function preload(){
   prova = loadImage('/assets/images/gm/1.png');
+
+  // songs
+  track = loadSound("/assets/sounds/Fireworks.mp3");
+  // track = loadSound("/assets/sounds/ItFeelsGood.mp3");
 }
+
+
 
 // __ Setup __
 
@@ -32,6 +39,12 @@ function setup() {
 
   myCursor = new myCursor();
 
+  // console.log(otherCursors.length)
+  // if (otherCursors.length == 0) {
+  //   track.play();
+  // }
+
+  // Sprites
   pointer = createSprite(0, 0);
   pointer.addImage(loadImage('/assets/images/gm/pointer.png'));
 
@@ -44,7 +57,10 @@ function setup() {
   click0.visible = true;
 
   socket.on("mouseBroadcast", mousePos);
+  socket.emit("play", {times: audio.currentTime, room : roomname});
+
 }
+
 
 
 // __ Draw __
@@ -59,6 +75,18 @@ function draw() {
     height: height,
   };
   socket.emit("mouse", mousePosition);
+
+  // let trackTime = {
+  //   time: millis()/1000,
+    // time: track.currentTime(),
+  // }
+  // console.log(trackTime);
+
+  // if (???) {
+    //socket.emit("songTime", trackTime);
+    // console.log("time sent");
+  // }
+
 
   translate(width / 2, height / 2);
 
@@ -103,19 +131,49 @@ function draw() {
 
 }
 
+function mouseClicked() {
+}
+
+
 
 // __ Sockets Listeners __
 
 socket.on("connect", newPlayerConnected);
+//socket.once("timeBroadcast", playSong);
 
 function newPlayerConnected() {
   console.log("your id:", socket.id);
+  socket.emit('subscribe', roomname);
+  // socket.emit("where", {times: audio.currentTime, room : roomname});
 }
+
+socket.on("first", function (data) {
+  audio.ontimeupdate = function () {
+    socket.emit("where", {times: audio.currentTime, room : roomname});
+  };
+});
+
+socket.on("current", function (data) {
+  var diff = audio.currentTime - data;
+  if (diff < 0 || diff > 2) {
+    audio.currentTime = data;
+  }
+  audio.ontimeupdate = function () {
+    socket.emit("where", {times: audio.currentTime, room : roomname});
+  };
+});
+
+socket.on("playsong", function (data) {
+  audio.currentTime = data;
+  audio.play();
+});
 
 socket.on('deleteCursor', function(data) {
   var getPos = otherCursors.findIndex(cursor => cursor.id === data.id);
   otherCursors.splice(getPos, 1);
 });
+
+
 
 
 // __ Socket functions __
@@ -137,6 +195,18 @@ function mousePos(data) {
   }
 
 }
+
+
+// function playSong(data) {
+//   // if (track.isPlaying() == false) {
+//     console.log(data.time)
+//     console.log("time received");
+//     timeJump = data.time;
+//     track.jump(timeJump);
+//     track.play();
+//   // }
+// }
+
 
 
 // __ Class and functions __

@@ -1,24 +1,20 @@
-let socket = io();
-
-socket.on("connect", newPlayerConnected);
-
-function newPlayerConnected() {
-  console.log("your id:", socket.id);
-}
-
 var w = 0;
 
 function preload(){
   // put preload code here
+  // track = loadSound("/assets/sounds/ItFeelsGood.mp3");
 }
 
 function setup() {
-  createCanvas(windowWidth,windowHeight)
   // put setup code here
+  // createCanvas(windowWidth,windowHeight);
+  // track.play();
 }
 
 function draw() {
   // put drawing code here
+  // trackTime = track.currentTime();
+  // console.log(trackTime);
 }
 
 function watch() {
