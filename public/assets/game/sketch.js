@@ -131,8 +131,9 @@ function draw() {
 }
 
 function mouseClicked() {
-  socket.emit("play", {times: audio.currentTime, room : roomname});
-  
+  if (audio.isPlaying() == false) {
+    socket.emit("play", {times: audio.currentTime, room : roomname});
+  }
 }
 
 
