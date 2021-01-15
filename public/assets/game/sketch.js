@@ -131,10 +131,7 @@ function draw() {
 }
 
 function mouseClicked() {
-  if (audio.isPlaying() == false) {
-    console.log("hi")
-    socket.emit("play", {times: audio.currentTime, room : roomname});
-  }
+  socket.emit("play", {times: audio.currentTime, room : roomname});
 }
 
 
@@ -157,10 +154,10 @@ socket.on("first", function (data) {
 });
 
 socket.on("current", function (data) {
-  var diff = audio.currentTime - data;
-  if (diff < 0 || diff > 2) {
+  // var diff = audio.currentTime - data;
+  // if (diff < 0 || diff > 2) {
     audio.currentTime = data;
-  }
+  // }
   audio.ontimeupdate = function () {
     socket.emit("where", {times: audio.currentTime, room : roomname});
   };
