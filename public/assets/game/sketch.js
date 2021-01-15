@@ -57,7 +57,6 @@ function setup() {
   click0.visible = true;
 
   socket.on("mouseBroadcast", mousePos);
-  socket.emit("play", {times: audio.currentTime, room : roomname});
 
 }
 
@@ -132,6 +131,8 @@ function draw() {
 }
 
 function mouseClicked() {
+  socket.emit("play", {times: audio.currentTime, room : roomname});
+  
 }
 
 
