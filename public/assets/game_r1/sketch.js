@@ -142,8 +142,10 @@ function draw() {
     }
   }
 
-  songTime = audio.currentTime;
-  songPercent = songTime / audio.duration;
+  if (audio.currentTime > 0) {
+    songTime = audio.currentTime;
+    songPercent = songTime / (audio.duration);
+  }
 
   //run beatmap
   for(let i = 0; i < beatmap.length; i++) {
@@ -194,6 +196,7 @@ socket.on("current", function (data) {
 
 socket.on("playsong", function (data) {
   audio.currentTime = data;
+  console.log(audio.currentTime);
   audio.play();
 });
 
@@ -371,7 +374,7 @@ class Beat {
     this.count = 0;
     this.countPercentEnd = 0;
     this.countEnd = 0;
-    this.timePercent = this.time/audio.duration;
+    this.timePercent = this.time/(audio.duration);
 
     this.beatHit = false;
     this.spriteLoaded = false;
