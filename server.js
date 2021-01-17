@@ -64,13 +64,21 @@ io.on("connection", function (socket) {
     // socket.broadcast.emit("mouseBroadcast", mouseData);
   });
 
+  socket.on("countPlayers", function(data) {
+    var playersData = {
+      pl: data.pl,
+      room: data.room,
+    }
+    socket.emit("playersNumber", playersData);
+    // console.log(playersData);
+  });
+
   socket.on("disconnect", function() {
     var socketData = {
       id: socket.id,
     }
     socket.broadcast.emit("deleteCursor", socketData);
     ctr--;
-    console.log(ctr);
   });
 
 });

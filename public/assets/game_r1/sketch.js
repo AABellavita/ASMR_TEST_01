@@ -154,6 +154,13 @@ function draw() {
       beatmap[i].run();
   }
 
+  // giocatori online
+  let playersOnline = {
+    pl: otherCursors.length + 1,
+    room: roomname
+  };
+  socket.emit("countPlayers", playersOnline);
+
 }
 
 function mouseClicked() {

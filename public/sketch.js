@@ -64,3 +64,13 @@ function info(){
     w = 0
   }
 }
+
+socket.on("playersNumber", displayPlayers);
+
+function displayPlayers() {
+  // qui ci va la gestione degli omini
+  // questo sketch riceve dal server il pacchetto di dati "playersData"
+  // all'interno c'è:
+  // data.pl = numoro di giocatori;
+  // data.room = stanza da cui arrivano i dati (data.room è una stringa, non un numero);
+}
