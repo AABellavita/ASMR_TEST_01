@@ -1,3 +1,5 @@
+let socket = io();
+
 var w = 0;
 
 function preload(){
@@ -30,13 +32,15 @@ function watch() {
 }
 
 function gioca() {
-    document.getElementById("overlay").style.display = "none";
-    document.getElementById("header").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("header").style.display = "none";
+  console.log(socket.id)
+  socket.emit("join", {id: socket.id});
 }
 
 function home() {
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("header").style.display = "flex";
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("header").style.display = "flex";
 }
 
 function info(){
