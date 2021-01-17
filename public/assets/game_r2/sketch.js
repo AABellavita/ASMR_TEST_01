@@ -6,7 +6,8 @@ var myParticles = [];
 var otherCursors = [];
 var clickEffect = [];
 var audio = document.getElementById('myaudio');
-var roomname = "1";
+var roomname = "2";
+var playerIn = true;
 var palette = [
   {r: 3, g: 196, b: 216 },
   {r: 0, g: 146, b: 255 },
@@ -16,9 +17,9 @@ var palette = [
   {r: 255, g: 80, b: 51 },
   {r: 255, g: 103, b: 0 }
 ];
+var start = 0
 
-
-// __ varibili Riki
+// __ varibili Riki __
 
 let beatmap = [];
 let beatDuration = 2;
@@ -37,10 +38,10 @@ let songStarted = false;
 // __ Preload __
 
 function preload(){
-  prova = loadImage('/assets/images/gm/1.png');
+  prova = loadImage('/assets/images/gm/r1/1.png');
 
   clap = loadSound("/assets/sounds/clap.wav");
-  data = loadJSON("/assets/game/beatmap.json");
+  data = loadJSON("/assets/game_r1/beatmap.json");
 }
 
 
@@ -53,13 +54,11 @@ function setup() {
 
   myCursor = new myCursor();
 
-
   // Sprites
   pointer = createSprite(0, 0);
-  pointer.addImage(loadImage('/assets/images/gm/pointer.png'));
+  pointer.addImage(loadImage('/assets/images/gm/r1/pointer.png'));
 
   socket.on("mouseBroadcast", mousePos);
-
 
   //build beatmap
   for (let i = 0; i < data.beats.length; i++) {
@@ -77,10 +76,7 @@ function setup() {
       data.beats[i].cornerX,
       data.beats[i].cornerY,
     );
-
   }
-
-  socket.emit("play", {times: audio.currentTime, room : roomname});
 
 }
 
@@ -90,60 +86,68 @@ function setup() {
 
 function draw() {
   background("#030c24");
+  noCursor();
 
   let mousePosition = {
     x: mouseX,
     y: mouseY,
     width: width,
     height: height,
+    room: roomname
   };
-  socket.emit("mouse", mousePosition);
 
   translate(width / 2, height / 2);
 
   drawSprites();
 
-  var rotAngle = (360 / (otherCursors.length+1));
-
-
   pointer.position.x = mouseX - width / 2;
   pointer.position.y = mouseY - height / 2;
 
-  noCursor();
-  myCursor.update();
-  myCursor.display();
+  if (playerIn == true) {
+    myCursor.update();
+    myCursor.display();
+    socket.emit("mouse", mousePosition);
 
-  for(var i = 0; i < otherCursors.length; i++){
-    push();
-    rotate(rotAngle * (i+1));
-    otherCursors[i].display();
-    otherCursors[i].update();
-    pop();
-  }
+    for(var i = 0; i < otherCursors.length; i++) {
+      push();
+      rotate( (360 / (otherCursors.length+1) * (i+1)) );
+      otherCursors[i].display();
+      otherCursors[i].update();
+      pop();
+    }
 
-  if (mouseIsPressed) {
-    for (var i = 0; i < random(0, 80); i++) {
-      myParticles.push(new myParticle());
+    if (mouseIsPressed) {
+      for (var i = 0; i < random(0, 80); i++) {
+        myParticles.push(new myParticle());
+      }
+    }
+
+    for (var i = 0; i < myParticles.length; i++) {
+      myParticles[i].update();
+      myParticles[i].render();
+      if (myParticles[i].particleIsFinished()) {
+        myParticles.splice(i, 1);
+      }
+    }
+
+    for (var i = 0; i < clickEffect.length; i++) {
+      var circle = clickEffect[i];
+      circle.display();
+    }
+  } else {
+    for(var i = 0; i < otherCursors.length; i++){
+      push();
+      rotate( (360 / (otherCursors.length) * (i+1)) );
+      otherCursors[i].display();
+      otherCursors[i].update();
+      pop();
     }
   }
 
-  for (var i = 0; i < myParticles.length; i++) {
-    myParticles[i].update();
-    myParticles[i].render();
-    if (myParticles[i].particleIsFinished()) {
-      myParticles.splice(i, 1);
-    }
+  if (audio.currentTime > 0) {
+    songTime = audio.currentTime;
+    songPercent = songTime / (audio.duration);
   }
-
-  for (var i = 0; i < clickEffect.length; i++) {
-    var circle = clickEffect[i];
-    circle.display();
-  }
-
-
-  songTime = audio.currentTime;
-  songPercent = songTime / audio.duration;
-
 
   //run beatmap
   for(let i = 0; i < beatmap.length; i++) {
@@ -153,7 +157,10 @@ function draw() {
 }
 
 function mouseClicked() {
-
+  if (start == 0) {
+    socket.emit("play", {times: audio.currentTime, room : roomname});
+    start++;
+  }
 }
 
 
@@ -161,15 +168,21 @@ function mouseClicked() {
 // __ Sockets Listeners __
 
 socket.on("connect", newPlayerConnected);
+socket.on("playerJoined", newPlayerJoined);
 
 function newPlayerConnected() {
   console.log("your id:", socket.id);
   socket.emit('subscribe', roomname);
 }
 
+function newPlayerJoined() {
+  console.log("true")
+  playerIn = true;
+}
+
 socket.on("first", function (data) {
   audio.ontimeupdate = function () {
-    socket.emit("where", {times: audio.currentTime, room : roomname});
+    socket.emit("where", {times: audio.currentTime, room: roomname});
   };
 });
 
@@ -179,7 +192,7 @@ socket.on("current", function (data) {
     audio.currentTime = data;
   }
   audio.ontimeupdate = function () {
-    socket.emit("where", {times: audio.currentTime, room : roomname});
+    socket.emit("where", {times: audio.currentTime, room: roomname});
   };
 });
 
@@ -193,7 +206,6 @@ socket.on('deleteCursor', function(data) {
   var getPos = otherCursors.findIndex(cursor => cursor.id === data.id);
   otherCursors.splice(getPos, 1);
 });
-
 
 
 
@@ -318,6 +330,7 @@ function otherCursor(temp_x, temp_y, temp_id) {
   }
 }
 
+
 function circles() {
   this.x = mouseX - width / 2;
   this.y = mouseY - height / 2;
@@ -363,7 +376,7 @@ class Beat {
     this.count = 0;
     this.countPercentEnd = 0;
     this.countEnd = 0;
-    this.timePercent = this.time/audio.duration;
+    this.timePercent = this.time/(audio.duration);
 
     this.beatHit = false;
     this.spriteLoaded = false;
@@ -446,17 +459,17 @@ class Beat {
     if (this.spriteLoaded == false){//load the correct sprite
       if(this.type == 'beat'){
         this.beatSprite = createSprite(this.posX, this.posY);
-        this.beatSprite.addImage(loadImage('/assets/images/gm/beat.png'));
+        this.beatSprite.addImage(loadImage('/assets/images/gm/r1/beat.png'));
       }
       else if(this.type == 'slider'){
         this.beatSprite = createSprite(this.cornerX+321/2, this.cornerY+303/2);
         //this.beatSprite.addImage(loadImage('assets/slider'+this.sliderType+'.png'));
-        this.beatSprite.addImage(loadImage('/assets/images/gm/slider1.png'));
+        this.beatSprite.addImage(loadImage('/assets/images/gm/r1/slider1.png'));
       }
       else if(this.type == 'spin'){
         this.beatSprite = createSprite(this.posX, this.posY);
         //this.beatSprite.addImage(loadImage('assets/spin.png'));
-        this.beatSprite.addImage(loadImage('/assets/images/gm/beat.png'));
+        this.beatSprite.addImage(loadImage('/assets/images/gm/r1/beat.png'));
       }
       this.spriteLoaded = true;
     }

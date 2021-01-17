@@ -31,11 +31,23 @@ function watch() {
   }
 }
 
-function gioca() {
+function gioca_1() {
   document.getElementById("overlay").style.display = "none";
   document.getElementById("header").style.display = "none";
   console.log(socket.id)
   socket.emit("join", {id: socket.id});
+}
+
+function gioca_2() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("header").style.display = "none";
+  document.getElementById("myFrame").src = "/assets/game_r2/index.html";
+}
+
+function gioca_3() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("header").style.display = "none";
+  document.getElementById("myFrame").src = "/assets/game_r3/index.html";
 }
 
 function home() {

@@ -58,8 +58,10 @@ io.on("connection", function (socket) {
       width: data.width,
       height: data.height,
       id: socket.id,
+      room: data.room,
     }
-    socket.broadcast.emit("mouseBroadcast", mouseData);
+    socket.to(data.room).emit("mouseBroadcast", mouseData);
+    // socket.broadcast.emit("mouseBroadcast", mouseData);
   });
 
   socket.on("disconnect", function() {

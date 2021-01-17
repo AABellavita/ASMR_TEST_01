@@ -18,6 +18,7 @@ var palette = [
   {r: 255, g: 103, b: 0 }
 ];
 var start = 0
+
 // __ varibili Riki __
 
 let beatmap = [];
@@ -92,6 +93,7 @@ function draw() {
     y: mouseY,
     width: width,
     height: height,
+    room: roomname
   };
 
   translate(width / 2, height / 2);
